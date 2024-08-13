@@ -443,8 +443,14 @@ fi
 
 [ "$DISABLE_NOTIFICATION" = true ] && CURL_OPTIONS="$CURL_OPTIONS --form-string disable_notification=true"
 
-for id in "${CHATS[@]}"; do
-	MY_CURL_OPTIONS="$CURL_OPTIONS --form-string chat_id=$id $URL$TOKEN/$METHOD"
+for chat in "${CHATS[@]}"; do
+    IFS=':' read -r chat_id message_thread_id <<< "$chat"
+    if [ -n "$message_thread_id" ]; then
+        MY_CURL_OPTIONS="$CURL_OPTIONS --form-string chat_id=$chat_id --form-string message_thread_id=$message_thread_id $URL$TOKEN/$METHOD"
+    else
+        MY_CURL_OPTIONS="$CURL_OPTIONS --form-string chat_id=$chat_id $URL$TOKEN/$METHOD"
+    fi
+
 	if [ "$DRY_RUN" = true ]; then
 		echo "Executing: curl $MY_CURL_OPTIONS"
 		echo "     Text: $TEXT"
